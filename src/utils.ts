@@ -31,10 +31,6 @@ const resolveRootPackageWithGOPATH = () => {
 };
 
 export const resolveRootPackage = () => {
-  if (fileInGOPATH(process.env.GOPATH)) {
-    return resolveRootPackageWithGOPATH();
-  }
-
   const pwd = window.activeTextEditor.document.fileName;
   const currentFolder = pwd
     .split(path.sep)

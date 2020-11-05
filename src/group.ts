@@ -35,12 +35,16 @@ export const goGroupImports = async () => {
     Number.MAX_VALUE
   );
   edit.replace(document.uri, range, importGroupsToString(groupedList));
+
+  console.log(importGroupsToString(groupedList));
+
   workspace.applyEdit(edit).then(document.save);
 };
 
 type ImportGroups = {
   stdlib: string[];
   thirdParty: string[];
+  utilParty: string[];
   own: string[];
 };
 
@@ -56,8 +60,22 @@ export const group = (imports: string[], rootPkg: string): ImportGroups => {
   const importGroups = <ImportGroups>{
     stdlib: [],
     thirdParty: [],
+    utilParty: [],
     own: [],
   };
+
+  // 细分 party module
+  var prefix = ""
+  imports.forEach((imp) => {
+    if (isOwnImport(imp, rootPkg)) {
+      var s = imp.split("/", 1);
+      if (s.length == 0) {
+        return;
+      }
+      prefix = s[0];
+      return;
+    }
+  });
 
   imports.forEach((imp) => {
     if (isOwnImport(imp, rootPkg)) {
@@ -65,7 +83,11 @@ export const group = (imports: string[], rootPkg: string): ImportGroups => {
     } else if (isStdlibImport(imp)) {
       importGroups.stdlib.push(imp);
     } else {
-      importGroups.thirdParty.push(imp);
+      if (imp.search(prefix) != -1) {
+        importGroups.utilParty.push(imp);
+      } else {
+        importGroups.thirdParty.push(imp);
+      }
     }
   });
 
